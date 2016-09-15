@@ -86,6 +86,7 @@ describe('FirebaseListFactory', () => {
 
   });
 
+  
   describe('query', () => {
 
     describe('orderByChild', () => {
@@ -386,6 +387,30 @@ describe('FirebaseListFactory', () => {
           done();
         }, done.fail);
     });
+
+
+    describe('subsequent call to list', () =>{
+
+    it('test 1', (done: any) =>{
+      console.log('subsequent call to list');
+
+      var ref = firebase.database().refFromURL(`${rootDatabaseUrl}/test1`);
+      const observable = FirebaseListFactory(ref);
+
+      ref.set([{name: "Item1"}, {name: "Item2"}, {name: "Item3"}]).then(() => {
+        const observable = FirebaseListFactory(firebase.database().refFromURL(`${rootDatabaseUrl}/test1`));
+        observable.subscribe(items =>{
+          console.log("fisrt time: ", items.map(x => x.name));
+          const observable2 = FirebaseListFactory(firebase.database().refFromURL(`${rootDatabaseUrl}/test1`));
+          observable2.subscribe(t => {
+            console.log("second time: ", t.map(x => x.name));
+          });
+        });
+      });
+      
+    });
+
+  });
 
 
     it('should emit a new value when a child moves', (done: any) => {
